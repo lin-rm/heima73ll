@@ -11,7 +11,7 @@
                     <el-button style="float: right">发送验证码</el-button>
                 </el-form-item>
                 <el-form-item>
-                    <el-checkbox v-model="checked"></el-checkbox>我已阅读并同意 <el-link type="primary">用户协议</el-link> 和 <el-link type="primary">隐私条款</el-link>
+                    <el-checkbox v-model="checked"></el-checkbox>我已阅读并同意 <el-link :underline="false" type="primary">用户协议</el-link> 和 <el-link :underline="false" type="primary">隐私条款</el-link>
                 </el-form-item>
                 <el-form-item>
                     <el-button type='primary' style="width: 100%"> 登 录 </el-button>
