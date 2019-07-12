@@ -12,7 +12,7 @@ export default {
 
 <style scoped lang='less'>
     .container {
-        position: relative;
+        // position: relative;
 
         .home-welcome {
             position: absolute;

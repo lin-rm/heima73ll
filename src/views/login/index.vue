@@ -59,6 +59,7 @@ export default {
             .then(res => {
               const data = res.data
               console.log(data)
+              window.sessionStorage.setItem('heima73ll', JSON.stringify(res.data))
               this.$router.push('/')
             })
             .catch(() => {
