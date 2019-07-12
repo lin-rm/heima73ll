@@ -2,19 +2,19 @@
     <div class="login-container">
         <el-card class="login_box">
             <img src="../../assets/images/logo_index.png" alt="">
-            <el-form>
-                <el-form-item>
-                    <el-input placeholder='请输入手机号'></el-input>
+            <el-form ref="loginForm" status-icon :model="loginForm" :rules="loginRules">
+                <el-form-item prop="mobile">
+                    <el-input v-model="loginForm.mobile" placeholder='请输入手机号'></el-input>
                 </el-form-item>
-                <el-form-item>
-                    <el-input placeholder='请输入验证码' style="width:280px"></el-input>
+                <el-form-item prop="code">
+                    <el-input v-model="loginForm.code" placeholder='请输入验证码' style="width:280px"></el-input>
                     <el-button style="float: right">发送验证码</el-button>
                 </el-form-item>
                 <el-form-item>
                     <el-checkbox v-model="checked"></el-checkbox>我已阅读并同意 <el-link :underline="false" type="primary">用户协议</el-link> 和 <el-link :underline="false" type="primary">隐私条款</el-link>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type='primary' style="width: 100%"> 登 录 </el-button>
+                    <el-button type='primary' style="width: 100%" @click="login()"> 登 录 </el-button>
                 </el-form-item>
             </el-form>
 
@@ -25,8 +25,47 @@
 <script>
 export default {
   data () {
+    const checkMobile = (rule, value, callback) => {
+      if (/^1[3-9]\d{9}$/.test(value)) {
+        callback()
+      } else {
+        callback(new Error('手机号格式不对'))
+      }
+    }
     return {
+      loginForm: {
+        mobile: '18210138888',
+        code: '246810'
+      },
+      loginRules: {
+        mobile: [
+          { required: true, message: '手机号必填', trigger: 'blur' },
+          { validator: checkMobile, trigger: 'blur' }
+        ],
+        code: [
+          { required: true, message: '验证码必填', trigger: 'blur' },
+          { len: 6, message: '必须是六位', trigger: 'blur' }
+
+        ]
+      },
       checked: true
+    }
+  },
+  methods: {
+    login () {
+      this.$refs.loginForm.validate((valid) => {
+        if (valid) {
+          this.$http.post('http://ttapi.research.itcast.cn/mp/v1_0/authorizations', this.loginForm)
+            .then(res => {
+              const data = res.data
+              console.log(data)
+              this.$router.push('/')
+            })
+            .catch(() => {
+              this.$message.error('用户名或密码错误')
+            })
+        }
+      })
     }
   }
 }
