@@ -23,6 +23,7 @@
 </template>
 
 <script>
+// import { async } from 'q'
 export default {
   data () {
     const checkMobile = (rule, value, callback) => {
@@ -53,18 +54,29 @@ export default {
   },
   methods: {
     login () {
-      this.$refs.loginForm.validate((valid) => {
+      // this.$refs.loginForm.validate((valid) => {
+      //   if (valid) {
+      //     this.$http.post('http://ttapi.research.itcast.cn/mp/v1_0/authorizations', this.loginForm)
+      //       .then(res => {
+      //         const data = res.data
+      //         console.log(data)
+      //         window.sessionStorage.setItem('heima73ll', JSON.stringify(res.data.data))
+      //         this.$router.push('/')
+      //       })
+      //       .catch(() => {
+      //         this.$message.error('用户名或密码错误')
+      //       })
+      //   }
+      // })
+      this.$refs.loginForm.validate(async valid => {
         if (valid) {
-          this.$http.post('http://ttapi.research.itcast.cn/mp/v1_0/authorizations', this.loginForm)
-            .then(res => {
-              const data = res.data
-              console.log(data)
-              window.sessionStorage.setItem('heima73ll', JSON.stringify(res.data.data))
-              this.$router.push('/')
-            })
-            .catch(() => {
-              this.$message.error('用户名或密码错误')
-            })
+          try {
+            const res = await this.$http.post('authorizations', this.loginForm)
+            window.sessionStorage.setItem('heima73ll', JSON.stringify(res.data.data))
+            this.$router.push('/')
+          } catch (err) {
+            this.$message.error('用户名或密码错误')
+          }
         }
       })
     }
