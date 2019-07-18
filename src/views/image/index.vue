@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading="loading">
     <el-card>
       <div slot="header">
         <my-bread>素材管理</my-bread>
@@ -9,14 +9,18 @@
           <el-radio-button :label="false">全部</el-radio-button>
           <el-radio-button :label="true">收藏</el-radio-button>
         </el-radio-group>
-        <el-button size="small" style="float:right" type="success">添加素材</el-button>
+        <el-button size="small" @click="dialogVisible=true" style="float:right" type="success">添加素材</el-button>
       </div>
       <ul class="img-list">
         <li v-for="item in images" :key="item.id">
           <img :src="item.url" alt />
           <div class="fot" v-if="!reqParams.collect">
-            <span class="el-icon-star-off" :class="{red:item.is_collected}"></span>
-            <span class="el-icon-delete"></span>
+            <span
+              @click="toggleFav(item)"
+              class="el-icon-star-off"
+              :class="{red:item.is_collected}"
+            ></span>
+            <span @click="delImage(item.id)" class="el-icon-delete"></span>
           </div>
         </li>
       </ul>
@@ -30,6 +34,22 @@
         :total="total"
       ></el-pagination>
     </el-card>
+    <el-dialog title="添加素材" :visible.sync="dialogVisible" width="500px">
+      <el-upload
+        class="avatar-uploader"
+        action="http://ttapi.research.itcast.cn/mp/v1_0/user/images"
+        :show-file-list="false"
+        :headers="headers"
+        name="image"
+        :on-success="handleSuccess"
+      >
+        <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+      </el-upload>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -43,13 +63,52 @@ export default {
         per_page: 10
       },
       images: [],
-      total: 0
+      total: 0,
+      dialogVisible: false,
+      imageUrl: null,
+      headers: {
+        Authorization:
+          'Bearer ' +
+          JSON.parse(window.sessionStorage.getItem('heima73ll')).token
+      },
+      loading: false
     }
   },
   created () {
     this.getImages()
   },
   methods: {
+    delImage (id) {
+      this.$confirm('此操作将永久删除该图片, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          await this.$http.delete('user/images/' + id)
+          this.$message.success('删除成功')
+          this.getImages()
+        })
+        .catch(() => {})
+    },
+    async toggleFav (item) {
+      const {
+        data: { data }
+      } = await this.$http.put('user/images/' + item.id, {
+        collect: !item.is_collected
+      })
+      this.$message.success('操作成功')
+      item.is_collected = data.collect
+    },
+    handleSuccess (res) {
+      this.imageUrl = res.data.url
+      this.$message.success('上传成功')
+      window.setTimeout(() => {
+        this.dialogVisible = false
+        this.getImages()
+        this.imageUrl = null
+      }, 1500)
+    },
     pager (newPage) {
       this.reqParams.page = newPage
       this.getImages()
@@ -59,9 +118,13 @@ export default {
       this.getImages()
     },
     async getImages () {
-      const { data: { data } } = await this.$http.get('user/images', { params: this.reqParams })
+      this.loading = true
+      const {
+        data: { data }
+      } = await this.$http.get('user/images', { params: this.reqParams })
       this.images = data.results
       this.total = data.total_count
+      this.loading = false
     }
   }
 }

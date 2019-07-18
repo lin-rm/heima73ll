@@ -7,6 +7,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import router from '@/router'
 import axios from '@/api/axios'
 import components from '@/components'
+import '@/styles/index.less'
 
 // axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0'
 // axios.defaults.headers = {
